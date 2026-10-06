@@ -1,5 +1,4 @@
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
-import { CartItem } from './cart-item.entity';
 
 export enum CartStatus {
   ACTIVE = 'active',
@@ -17,8 +16,8 @@ export class Cart {
   })
   status: CartStatus;
 
-  @OneToMany(() => CartItem, (item) => item.cart, { cascade: true, eager: true })
-  items: CartItem[];
+  @OneToMany('CartItem', 'cart', { cascade: true, eager: true })
+  items: any[];
 
   @CreateDateColumn()
   createdAt: Date;

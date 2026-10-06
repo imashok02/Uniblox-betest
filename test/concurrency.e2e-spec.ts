@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import * as request from 'supertest';
+import request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { DataSource } from 'typeorm';
 
@@ -33,20 +33,24 @@ describe('Concurrency and Idempotency Tests (e2e)', () => {
     await dataSource.query('DELETE FROM coupons');
     await dataSource.query('DELETE FROM config');
 
+    // Use UUID v4 format for product IDs
+    const limitedProductId = '550e8400-e29b-41d4-a716-446655440001';
+    const regularProduct1Id = '550e8400-e29b-41d4-a716-446655440002';
+    const regularProduct2Id = '550e8400-e29b-41d4-a716-446655440003';
+
     // Create a product with limited inventory
-    const [product] = await dataSource.query(`
+    await dataSource.query(`
       INSERT INTO products (id, name, description, priceInCents, availableInventory, version)
-      VALUES ('test-product-1', 'Limited Item', 'Only 3 available', 5000, 3, 1)
-      RETURNING *
+      VALUES ('${limitedProductId}', 'Limited Item', 'Only 3 available', 5000, 3, 1)
     `);
-    productWithLimitedInventory = product;
+    productWithLimitedInventory = { id: limitedProductId };
 
     // Create regular products
     await dataSource.query(`
       INSERT INTO products (id, name, description, priceInCents, availableInventory, version)
       VALUES
-        ('test-product-2', 'Regular Item', 'Plenty in stock', 1000, 100, 1),
-        ('test-product-3', 'Another Item', 'Also in stock', 2000, 50, 1)
+        ('${regularProduct1Id}', 'Regular Item', 'Plenty in stock', 1000, 100, 1),
+        ('${regularProduct2Id}', 'Another Item', 'Also in stock', 2000, 50, 1)
     `);
 
     // Set up coupon config
@@ -66,10 +70,15 @@ describe('Concurrency and Idempotency Tests (e2e)', () => {
       const cart1 = await request(app.getHttpServer())
         .post('/carts')
         .expect(201);
-      await request(app.getHttpServer())
+
+      const addItemResponse = await request(app.getHttpServer())
         .post(`/carts/${cart1.body.id}/items`)
-        .send({ productId: productWithLimitedInventory.id, quantity: 2 })
-        .expect(201);
+        .send({ productId: productWithLimitedInventory.id, quantity: 2 });
+
+      if (addItemResponse.status !== 201) {
+        console.log('Add item failed:', addItemResponse.body);
+      }
+      expect(addItemResponse.status).toBe(201);
 
       const cart2 = await request(app.getHttpServer())
         .post('/carts')
@@ -124,7 +133,7 @@ describe('Concurrency and Idempotency Tests (e2e)', () => {
 
       await request(app.getHttpServer())
         .post(`/carts/${cart.body.id}/items`)
-        .send({ productId: 'test-product-2', quantity: 1 })
+        .send({ productId: '550e8400-e29b-41d4-a716-446655440002', quantity: 1 })
         .expect(201);
 
       const idempotencyKey = 'unique-key-12345';
@@ -160,7 +169,7 @@ describe('Concurrency and Idempotency Tests (e2e)', () => {
 
       await request(app.getHttpServer())
         .post(`/carts/${cart.body.id}/items`)
-        .send({ productId: 'test-product-2', quantity: 1 })
+        .send({ productId: '550e8400-e29b-41d4-a716-446655440002', quantity: 1 })
         .expect(201);
 
       // First checkout
@@ -190,7 +199,7 @@ describe('Concurrency and Idempotency Tests (e2e)', () => {
 
         await request(app.getHttpServer())
           .post(`/carts/${cart.body.id}/items`)
-          .send({ productId: 'test-product-2', quantity: 1 })
+          .send({ productId: '550e8400-e29b-41d4-a716-446655440002', quantity: 1 })
           .expect(201);
 
         await request(app.getHttpServer())
@@ -212,7 +221,7 @@ describe('Concurrency and Idempotency Tests (e2e)', () => {
         .expect(201);
       await request(app.getHttpServer())
         .post(`/carts/${cart1.body.id}/items`)
-        .send({ productId: 'test-product-3', quantity: 1 })
+        .send({ productId: '550e8400-e29b-41d4-a716-446655440003', quantity: 1 })
         .expect(201);
 
       const cart2 = await request(app.getHttpServer())
@@ -220,7 +229,7 @@ describe('Concurrency and Idempotency Tests (e2e)', () => {
         .expect(201);
       await request(app.getHttpServer())
         .post(`/carts/${cart2.body.id}/items`)
-        .send({ productId: 'test-product-3', quantity: 1 })
+        .send({ productId: '550e8400-e29b-41d4-a716-446655440003', quantity: 1 })
         .expect(201);
 
       // Try to use the same coupon concurrently

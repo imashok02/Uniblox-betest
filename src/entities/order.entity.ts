@@ -1,5 +1,4 @@
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, OneToMany } from 'typeorm';
-import { OrderItem } from './order-item.entity';
 
 @Entity('orders')
 export class Order {
@@ -13,8 +12,8 @@ export class Order {
   @Column({ unique: true, nullable: true })
   idempotencyKey: string;
 
-  @OneToMany(() => OrderItem, (item) => item.order, { cascade: true, eager: true })
-  items: OrderItem[];
+  @OneToMany('OrderItem', 'order', { cascade: true, eager: true })
+  items: any[];
 
   @Column({ type: 'integer' })
   subtotalInCents: number;

@@ -1,22 +1,20 @@
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm';
-import { Cart } from './cart.entity';
-import { Product } from './product.entity';
 
 @Entity('cart_items')
 export class CartItem {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => Cart, (cart) => cart.items, { onDelete: 'CASCADE' })
+  @ManyToOne('Cart', 'items', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'cartId' })
-  cart: Cart;
+  cart: any;
 
   @Column()
   cartId: string;
 
-  @ManyToOne(() => Product)
+  @ManyToOne('Product')
   @JoinColumn({ name: 'productId' })
-  product: Product;
+  product: any;
 
   @Column()
   productId: string;
