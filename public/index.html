@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Commerce Demo - Choose Your View</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            text-align: center;
+        }
+
+        h1 {
+            color: white;
+            font-size: 42px;
+            margin-bottom: 20px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .subtitle {
+            color: rgba(255,255,255,0.9);
+            font-size: 18px;
+            margin-bottom: 50px;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            transition: transform 0.3s, box-shadow 0.3s;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 50px rgba(0,0,0,0.3);
+        }
+
+        .card-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .card h2 {
+            color: #2c3e50;
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+
+        .card p {
+            color: #7f8c8d;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .card-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 6px;
+            font-weight: 600;
+            display: inline-block;
+            transition: opacity 0.3s;
+        }
+
+        .card-button:hover {
+            opacity: 0.9;
+        }
+
+        .card.admin .card-button {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        }
+
+        .features {
+            background: rgba(255,255,255,0.1);
+            padding: 30px;
+            border-radius: 12px;
+            color: white;
+        }
+
+        .features h3 {
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+
+        .features ul {
+            list-style: none;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            text-align: left;
+        }
+
+        .features li {
+            padding-left: 25px;
+            position: relative;
+        }
+
+        .features li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+            color: #2ecc71;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛍️ E-Commerce Checkout Demo</h1>
+        <p class="subtitle">
+            A reliable backend service demonstrating idempotent checkout, concurrency control, and reward coupons
+        </p>
+
+        <div class="cards">
+            <a href="/shop.html" class="card">
+                <div class="card-icon">🛒</div>
+                <h2>Shopping Store</h2>
+                <p>
+                    Browse products, add items to cart, and checkout.
+                    Open multiple tabs to simulate multiple customers shopping concurrently.
+                </p>
+                <div class="card-button">Start Shopping →</div>
+            </a>
+
+            <a href="/admin.html" class="card admin">
+                <div class="card-icon">🔐</div>
+                <h2>Admin Panel</h2>
+                <p>
+                    Generate coupons, view business reports, monitor orders, and track revenue.
+                    Real-time updates every 3 seconds.
+                </p>
+                <div class="card-button">Admin Access →</div>
+            </a>
+        </div>
+
+        <div class="features">
+            <h3>Key Features Demonstrated</h3>
+            <ul>
+                <li>Idempotent checkout (retry-safe)</li>
+                <li>Concurrent request handling</li>
+                <li>Inventory overselling prevention</li>
+                <li>Milestone-based coupon generation</li>
+                <li>Single-use coupon enforcement</li>
+                <li>Money handling without floating-point errors</li>
+                <li>Transaction-based concurrency control</li>
+                <li>Real-time inventory updates</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

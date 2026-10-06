@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - E-Commerce Store</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+            color: #333;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+        }
+
+        .admin-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .section {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            margin-bottom: 15px;
+            color: #34495e;
+            font-size: 18px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .stat-card.revenue {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .stat-card.coupons {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .stat-card.orders {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+
+        .stat-card h3 {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+
+        .stat-card .value {
+            font-size: 32px;
+            font-weight: bold;
+        }
+
+        .stat-card .sub {
+            font-size: 14px;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #5568d3;
+        }
+
+        button:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+        }
+
+        button.danger {
+            background: #e74c3c;
+        }
+
+        button.danger:hover {
+            background: #c0392b;
+        }
+
+        button.success {
+            background: #27ae60;
+        }
+
+        button.success:hover {
+            background: #229954;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table th {
+            background: #f8f9fa;
+            padding: 12px;
+            text-align: left;
+            border-bottom: 2px solid #dee2e6;
+            font-weight: 600;
+        }
+
+        table td {
+            padding: 12px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge.available {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge.redeemed {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .coupon-code {
+            font-family: 'Courier New', monospace;
+            background: #f8f9fa;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 15px 20px;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            max-width: 400px;
+            animation: slideIn 0.3s;
+            z-index: 1000;
+        }
+
+        .notification.success {
+            border-left: 4px solid #27ae60;
+        }
+
+        .notification.error {
+            border-left: 4px solid #e74c3c;
+        }
+
+        .notification.info {
+            border-left: 4px solid #3498db;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .nav-link {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .nav-link:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .order-item {
+            background: #f8f9fa;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+
+        .order-item strong {
+            color: #2c3e50;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1>🔐 Admin Panel</h1>
+                <p style="font-size: 14px; opacity: 0.9;">Manage coupons, view reports, and monitor orders</p>
+            </div>
+            <div style="display: flex; gap: 15px; align-items: center;">
+                <a href="/shop.html" class="nav-link">← Back to Store</a>
+                <div class="admin-badge">Administrator</div>
+            </div>
+        </div>
+
+        <!-- Stats Overview -->
+        <div class="section">
+            <h2>Business Overview</h2>
+            <div class="stats-grid" id="statsGrid">
+                <div class="stat-card orders">
+                    <h3>Total Orders</h3>
+                    <div class="value" id="totalOrders">-</div>
+                </div>
+                <div class="stat-card revenue">
+                    <h3>Net Revenue</h3>
+                    <div class="value" id="netRevenue">-</div>
+                    <div class="sub" id="grossRevenue">-</div>
+                </div>
+                <div class="stat-card coupons">
+                    <h3>Coupons Generated</h3>
+                    <div class="value" id="couponsGenerated">-</div>
+                    <div class="sub" id="couponsStats">-</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Products Sold</h3>
+                    <div class="value" id="totalProductsSold">-</div>
+                    <div class="sub">across all orders</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings -->
+        <div class="section">
+            <h2>Coupon Settings</h2>
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 6px; margin-bottom: 15px;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 15px;">
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #2c3e50;">
+                            Milestone Frequency (n)
+                        </label>
+                        <input type="number" id="configFrequency" min="1" max="100"
+                            style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;"
+                            placeholder="Every nth order">
+                        <small style="color: #7f8c8d;">Generate coupon every N orders</small>
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #2c3e50;">
+                            Discount Percent (x)
+                        </label>
+                        <input type="number" id="configDiscount" min="1" max="100"
+                            style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;"
+                            placeholder="Discount percentage">
+                        <small style="color: #7f8c8d;">Percentage off (1-100%)</small>
+                    </div>
+                </div>
+                <button onclick="updateConfig()" class="success">Update Settings</button>
+            </div>
+        </div>
+
+        <!-- Coupon Management -->
+        <div class="section">
+            <h2>Coupon Management</h2>
+            <div class="controls">
+                <button onclick="generateCoupon()" class="success">
+                    <span id="generateBtnText">Generate Coupon (Every 5th Order)</span>
+                </button>
+                <button onclick="loadCoupons()">
+                    Refresh Coupons
+                </button>
+            </div>
+            <div class="table-container">
+                <table id="couponsTable">
+                    <thead>
+                        <tr>
+                            <th>Code</th>
+                            <th>Discount</th>
+                            <th>Milestone</th>
+                            <th>Status</th>
+                            <th>Created</th>
+                            <th>Redeemed By</th>
+                        </tr>
+                    </thead>
+                    <tbody id="couponsBody">
+                        <tr>
+                            <td colspan="6" style="text-align: center; color: #7f8c8d;">
+                                Loading coupons...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Orders List -->
+        <div class="section">
+            <h2>Recent Orders</h2>
+            <div class="controls">
+                <button onclick="loadOrders()">Refresh Orders</button>
+            </div>
+            <div class="table-container">
+                <table id="ordersTable">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Items</th>
+                            <th>Subtotal</th>
+                            <th>Discount</th>
+                            <th>Total</th>
+                            <th>Coupon Used</th>
+                            <th>Created</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ordersBody">
+                        <tr>
+                            <td colspan="7" style="text-align: center; color: #7f8c8d;">
+                                Loading orders...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Products Sold Report -->
+        <div class="section">
+            <h2>Products Performance</h2>
+            <div class="controls">
+                <button onclick="loadReport()">Refresh Report</button>
+            </div>
+            <div class="table-container">
+                <table id="productsTable">
+                    <thead>
+                        <tr>
+                            <th>Product Name</th>
+                            <th>Quantity Sold</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productsBody">
+                        <tr>
+                            <td colspan="3" style="text-align: center; color: #7f8c8d;">
+                                Loading report...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="notifications"></div>
+
+    <script>
+        const API_BASE = 'http://localhost:3000';
+        let reportData = null;
+        let currentConfig = { frequency: 5, discountPercent: 10 };
+
+        // Notification system
+        function notify(message, type = 'info') {
+            const container = document.getElementById('notifications');
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `<strong>${type.toUpperCase()}:</strong> ${message}`;
+            container.appendChild(notification);
+
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
+        }
+
+        // Load config
+        async function loadConfig() {
+            try {
+                const response = await fetch(`${API_BASE}/admin/config`);
+                currentConfig = await response.json();
+
+                document.getElementById('configFrequency').value = currentConfig.frequency;
+                document.getElementById('configDiscount').value = currentConfig.discountPercent;
+
+                // Update button text
+                document.getElementById('generateBtnText').textContent =
+                    `Generate Coupon (Every ${currentConfig.frequency}${getOrdinalSuffix(currentConfig.frequency)} Order)`;
+            } catch (error) {
+                notify(`Error loading config: ${error.message}`, 'error');
+            }
+        }
+
+        // Update config
+        async function updateConfig() {
+            const frequency = parseInt(document.getElementById('configFrequency').value);
+            const discountPercent = parseInt(document.getElementById('configDiscount').value);
+
+            if (!frequency || frequency < 1 || frequency > 100) {
+                notify('Frequency must be between 1 and 100', 'error');
+                return;
+            }
+
+            if (!discountPercent || discountPercent < 1 || discountPercent > 100) {
+                notify('Discount must be between 1 and 100', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/admin/config`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ frequency, discountPercent })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to update config');
+                }
+
+                const result = await response.json();
+                currentConfig = { frequency, discountPercent };
+
+                notify(`Settings updated! Coupons will be generated every ${frequency}${getOrdinalSuffix(frequency)} order with ${discountPercent}% discount`, 'success');
+
+                // Update button text
+                document.getElementById('generateBtnText').textContent =
+                    `Generate Coupon (Every ${frequency}${getOrdinalSuffix(frequency)} Order)`;
+            } catch (error) {
+                notify(`Error updating config: ${error.message}`, 'error');
+            }
+        }
+
+        // Helper function for ordinal suffix
+        function getOrdinalSuffix(n) {
+            const s = ["th", "st", "nd", "rd"];
+            const v = n % 100;
+            return s[(v - 20) % 10] || s[v] || s[0];
+        }
+
+        // Load report and update stats
+        async function loadReport(showNotification = true) {
+            try {
+                const response = await fetch(`${API_BASE}/admin/report`);
+                reportData = await response.json();
+
+                // Update stats
+                document.getElementById('totalOrders').textContent = reportData.totalOrders;
+                document.getElementById('netRevenue').textContent =
+                    `$${(reportData.revenue.netRevenueInCents / 100).toFixed(2)}`;
+                document.getElementById('grossRevenue').textContent =
+                    `Gross: $${(reportData.revenue.grossRevenueInCents / 100).toFixed(2)} | Discounts: $${(reportData.revenue.totalDiscountsInCents / 100).toFixed(2)}`;
+                document.getElementById('couponsGenerated').textContent = reportData.coupons.generated;
+                document.getElementById('couponsStats').textContent =
+                    `${reportData.coupons.available} available | ${reportData.coupons.redeemed} redeemed`;
+
+                const totalSold = reportData.productsSold.reduce((sum, p) => sum + p.quantitySold, 0);
+                document.getElementById('totalProductsSold').textContent = totalSold;
+
+                // Update products table
+                const productsBody = document.getElementById('productsBody');
+                if (reportData.productsSold.length === 0) {
+                    productsBody.innerHTML = `
+                        <tr>
+                            <td colspan="3" style="text-align: center; color: #7f8c8d;">
+                                No products sold yet
+                            </td>
+                        </tr>
+                    `;
+                } else {
+                    productsBody.innerHTML = reportData.productsSold.map(p => `
+                        <tr>
+                            <td><strong>${p.productName}</strong></td>
+                            <td><strong style="font-size: 18px;">${p.quantitySold}</strong> units</td>
+                            <td><span class="badge available">Selling</span></td>
+                        </tr>
+                    `).join('');
+                }
+
+                if (showNotification) {
+                    notify('Report loaded', 'success');
+                }
+            } catch (error) {
+                notify(`Error loading report: ${error.message}`, 'error');
+            }
+        }
+
+        // Generate coupon
+        async function generateCoupon() {
+            try {
+                const response = await fetch(`${API_BASE}/admin/coupons/generate`, {
+                    method: 'POST'
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.message);
+                }
+
+                const coupon = await response.json();
+                notify(`Coupon generated: ${coupon.code} (${coupon.discountPercent}% off, milestone ${coupon.milestoneOrderNumber})`, 'success');
+
+                // Reload coupons and report
+                await loadCoupons();
+                await loadReport();
+            } catch (error) {
+                notify(error.message, 'error');
+            }
+        }
+
+        // Load coupons
+        async function loadCoupons(showNotification = true) {
+            try {
+                const response = await fetch(`${API_BASE}/admin/coupons`);
+                const coupons = await response.json();
+
+                const couponsBody = document.getElementById('couponsBody');
+
+                if (coupons.length === 0) {
+                    couponsBody.innerHTML = `
+                        <tr>
+                            <td colspan="6" style="text-align: center; color: #7f8c8d;">
+                                No coupons generated yet. Generate one when you reach order milestones (every 5 orders).
+                            </td>
+                        </tr>
+                    `;
+                } else {
+                    couponsBody.innerHTML = coupons.map(coupon => `
+                        <tr>
+                            <td><span class="coupon-code">${coupon.code}</span></td>
+                            <td><strong>${coupon.discountPercent}%</strong></td>
+                            <td>Order #${coupon.milestoneOrderNumber}</td>
+                            <td><span class="badge ${coupon.status}">${coupon.status.toUpperCase()}</span></td>
+                            <td>${new Date(coupon.createdAt).toLocaleString()}</td>
+                            <td>${coupon.redeemedByOrderId ? `Order ${coupon.redeemedByOrderId.substring(0, 8)}...` : '-'}</td>
+                        </tr>
+                    `).join('');
+                }
+            } catch (error) {
+                notify(`Error loading coupons: ${error.message}`, 'error');
+            }
+        }
+
+        // Load orders
+        async function loadOrders(showNotification = true) {
+            try {
+                const response = await fetch(`${API_BASE}/checkout/orders`);
+                const orders = await response.json();
+
+                const ordersBody = document.getElementById('ordersBody');
+
+                if (orders.length === 0) {
+                    ordersBody.innerHTML = `
+                        <tr>
+                            <td colspan="7" style="text-align: center; color: #7f8c8d;">
+                                No orders yet
+                            </td>
+                        </tr>
+                    `;
+                } else {
+                    ordersBody.innerHTML = orders.map(order => `
+                        <tr>
+                            <td><span class="coupon-code">${order.id.substring(0, 12)}...</span></td>
+                            <td>
+                                ${order.items.map(item =>
+                                    `<div class="order-item">
+                                        <strong>${item.productName}</strong><br>
+                                        <small>${item.quantity} × $${(item.priceInCents / 100).toFixed(2)}</small>
+                                    </div>`
+                                ).join('')}
+                            </td>
+                            <td><strong>$${(order.subtotalInCents / 100).toFixed(2)}</strong></td>
+                            <td>${order.discountInCents > 0 ?
+                                `<strong style="color: #e74c3c;">-$${(order.discountInCents / 100).toFixed(2)}</strong>` :
+                                '-'}</td>
+                            <td><strong style="font-size: 16px;">$${(order.totalInCents / 100).toFixed(2)}</strong></td>
+                            <td>${order.couponCode ?
+                                `<span class="coupon-code">${order.couponCode}</span> (${order.couponDiscountPercent}%)` :
+                                '-'}</td>
+                            <td>${new Date(order.createdAt).toLocaleString()}</td>
+                        </tr>
+                    `).join('');
+                }
+
+                if (showNotification) {
+                    notify('Orders loaded', 'success');
+                }
+            } catch (error) {
+                notify(`Error loading orders: ${error.message}`, 'error');
+            }
+        }
+
+        // Auto-refresh every 3 seconds (silent updates)
+        setInterval(() => {
+            loadReport(false);
+            loadCoupons(false);
+            loadOrders(false);
+        }, 3000);
+
+        // Initialize (show notifications on first load)
+        loadConfig();
+        loadReport();
+        loadCoupons(false);
+        loadOrders(false);
+    </script>
+</body>
+</html>

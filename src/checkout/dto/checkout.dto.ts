@@ -1,8 +1,8 @@
-import { IsOptional, IsUUID } from 'class-validator';
+import { IsOptional, IsUUID, IsString } from 'class-validator';
 
 export class CheckoutDto {
   @IsOptional()
-  @IsUUID()
+  @IsString()
   couponCode?: string;
 
   @IsOptional()

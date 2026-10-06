@@ -30,6 +30,33 @@ export class AdminService {
     await this.configRepository.save({ key, value });
   }
 
+  async getConfigValues() {
+    const frequency = await this.getConfig('COUPON_FREQUENCY', '5');
+    const discountPercent = await this.getConfig('COUPON_DISCOUNT_PERCENT', '10');
+
+    return {
+      frequency: parseInt(frequency),
+      discountPercent: parseInt(discountPercent),
+    };
+  }
+
+  async updateConfig(frequency: number, discountPercent: number) {
+    await this.setConfig('COUPON_FREQUENCY', frequency.toString());
+    await this.setConfig('COUPON_DISCOUNT_PERCENT', discountPercent.toString());
+
+    return {
+      frequency,
+      discountPercent,
+      message: 'Configuration updated successfully',
+    };
+  }
+
+  async getCoupons(): Promise<Coupon[]> {
+    return await this.couponRepository.find({
+      order: { createdAt: 'DESC' },
+    });
+  }
+
   async generateCoupon(): Promise<Coupon> {
     return await this.dataSource.transaction(async (manager) => {
       // Get configuration
