@@ -11,6 +11,8 @@ import { Coupon } from './entities/coupon.entity';
 import { Config } from './entities/config.entity';
 import { ProductsModule } from './products/products.module';
 import { CartsModule } from './carts/carts.module';
+import { CheckoutModule } from './checkout/checkout.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
@@ -23,6 +25,8 @@ import { CartsModule } from './carts/carts.module';
     }),
     ProductsModule,
     CartsModule,
+    CheckoutModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [AppService],
