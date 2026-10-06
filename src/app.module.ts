@@ -9,6 +9,8 @@ import { Order } from './entities/order.entity';
 import { OrderItem } from './entities/order-item.entity';
 import { Coupon } from './entities/coupon.entity';
 import { Config } from './entities/config.entity';
+import { ProductsModule } from './products/products.module';
+import { CartsModule } from './carts/carts.module';
 
 @Module({
   imports: [
@@ -19,6 +21,8 @@ import { Config } from './entities/config.entity';
       synchronize: true, // Auto-create tables in dev (not for production)
       logging: false,
     }),
+    ProductsModule,
+    CartsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
