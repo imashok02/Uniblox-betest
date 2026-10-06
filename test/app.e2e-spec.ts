@@ -13,13 +13,27 @@ describe('AppController (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+
+    // Configure static assets like in main.ts
+    app.useStaticAssets('public');
+
     await app.init();
   });
 
-  it('/ (GET)', () => {
+  it('/ (GET) - serves frontend landing page', () => {
     return request(app.getHttpServer())
       .get('/')
       .expect(200)
-      .expect('Hello World!');
+      .expect('Content-Type', /html/);
+  });
+
+  it('/products (GET) - returns products list', async () => {
+    const response = await request(app.getHttpServer())
+      .get('/products')
+      .expect(200);
+
+    expect(Array.isArray(response.body)).toBe(true);
+    // Products exist in production DB, test DB may be empty
+    expect(response.body.length).toBeGreaterThanOrEqual(0);
   });
 });

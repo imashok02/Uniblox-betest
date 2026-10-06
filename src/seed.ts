@@ -15,9 +15,14 @@ async function seed() {
   const productRepository = AppDataSource.getRepository(Product);
   const configRepository = AppDataSource.getRepository(Config);
 
-  // Clear existing data
-  await productRepository.clear();
-  await configRepository.clear();
+  // Clear existing data in correct order (children first, then parents)
+  await AppDataSource.query('DELETE FROM order_items');
+  await AppDataSource.query('DELETE FROM orders');
+  await AppDataSource.query('DELETE FROM cart_items');
+  await AppDataSource.query('DELETE FROM carts');
+  await AppDataSource.query('DELETE FROM coupons');
+  await AppDataSource.query('DELETE FROM products');
+  await AppDataSource.query('DELETE FROM config');
 
   // Seed products
   const products = [

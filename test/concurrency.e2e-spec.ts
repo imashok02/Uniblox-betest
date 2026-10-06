@@ -138,7 +138,7 @@ describe('Concurrency and Idempotency Tests (e2e)', () => {
         .send({ productId: '550e8400-e29b-41d4-a716-446655440002', quantity: 1 })
         .expect(201);
 
-      const idempotencyKey = 'unique-key-12345';
+      const idempotencyKey = '550e8400-e29b-41d4-a716-446655440099'; // Valid UUID format
 
       // First checkout
       const response1 = await request(app.getHttpServer())
