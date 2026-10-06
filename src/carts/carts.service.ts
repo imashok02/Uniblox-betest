@@ -24,7 +24,7 @@ export class CartsService {
   async findOne(id: string): Promise<Cart> {
     const cart = await this.cartRepository.findOne({
       where: { id },
-      relations: ['items', 'items.product'],
+      relations: { items: { product: true } },
     });
 
     if (!cart) {

@@ -86,7 +86,7 @@ export class AdminService {
   }
 
   async getReport() {
-    const orders = await this.orderRepository.find({ relations: ['items'] });
+    const orders = await this.orderRepository.find({ relations: { items: true } });
     const coupons = await this.couponRepository.find();
 
     // Calculate product quantities

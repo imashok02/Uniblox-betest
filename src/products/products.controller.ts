@@ -1,4 +1,4 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, NotFoundException } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { Product } from '../entities/product.entity';
 
@@ -13,6 +13,10 @@ export class ProductsController {
 
   @Get(':id')
   async findOne(@Param('id') id: string): Promise<Product> {
-    return this.productsService.findOne(id);
+    const product = await this.productsService.findOne(id);
+    if (!product) {
+      throw new NotFoundException(`Product ${id} not found`);
+    }
+    return product;
   }
 }

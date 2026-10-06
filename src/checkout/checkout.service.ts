@@ -35,7 +35,7 @@ export class CheckoutService {
     if (idempotencyKey) {
       const existingOrder = await this.orderRepository.findOne({
         where: { idempotencyKey },
-        relations: ['items'],
+        relations: { items: true },
       });
       if (existingOrder) {
         return existingOrder;
@@ -45,14 +45,14 @@ export class CheckoutService {
     // Check if cart was already checked out
     const existingOrderByCart = await this.orderRepository.findOne({
       where: { cartId },
-      relations: ['items'],
+      relations: { items: true },
     });
     if (existingOrderByCart) {
       return existingOrderByCart;
     }
 
     // Use a transaction for atomicity
-    return await this.dataSource.transaction(async (manager) => {
+    const result = await this.dataSource.transaction(async (manager) => {
       const cart = await this.cartsService.findOne(cartId);
 
       if (cart.status !== CartStatus.ACTIVE) {
@@ -175,15 +175,17 @@ export class CheckoutService {
       // Fetch complete order with items
       return await manager.findOne(Order, {
         where: { id: savedOrder.id },
-        relations: ['items'],
+        relations: { items: true },
       });
     });
+
+    return result!;
   }
 
   async findOne(id: string): Promise<Order> {
     const order = await this.orderRepository.findOne({
       where: { id },
-      relations: ['items'],
+      relations: { items: true },
     });
 
     if (!order) {
@@ -195,7 +197,7 @@ export class CheckoutService {
 
   async findAll(): Promise<Order[]> {
     return this.orderRepository.find({
-      relations: ['items'],
+      relations: { items: true },
       order: { createdAt: 'DESC' },
     });
   }
