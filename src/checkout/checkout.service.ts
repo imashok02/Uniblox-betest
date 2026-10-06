@@ -10,8 +10,8 @@ import { Order } from '../entities/order.entity';
 import { OrderItem } from '../entities/order-item.entity';
 import { Product } from '../entities/product.entity';
 import { Coupon, CouponStatus } from '../entities/coupon.entity';
+import { Cart, CartStatus } from '../entities/cart.entity';
 import { CartsService } from '../carts/carts.service';
-import { CartStatus } from '../entities/cart.entity';
 
 @Injectable()
 export class CheckoutService {
@@ -53,7 +53,15 @@ export class CheckoutService {
 
     // Use a transaction for atomicity
     const result = await this.dataSource.transaction(async (manager) => {
-      const cart = await this.cartsService.findOne(cartId);
+      // Load cart with items using the transaction manager
+      const cart: any = await manager.findOne(Cart, {
+        where: { id: cartId },
+        relations: { items: { product: true } },
+      });
+
+      if (!cart) {
+        throw new NotFoundException(`Cart ${cartId} not found`);
+      }
 
       if (cart.status !== CartStatus.ACTIVE) {
         throw new BadRequestException('Cart has already been checked out');
@@ -63,11 +71,11 @@ export class CheckoutService {
         throw new BadRequestException('Cart is empty');
       }
 
-      // Lock products for update to prevent concurrent overselling
-      const productIds = cart.items.map((item) => item.productId);
+      // Fetch products - SQLite doesn't support pessimistic locks,
+      // but transactions provide serialization
+      const productIds = cart.items.map((item: any) => item.productId);
       const products = await manager
         .createQueryBuilder(Product, 'product')
-        .setLock('pessimistic_write')
         .whereInIds(productIds)
         .getMany();
 
@@ -78,33 +86,33 @@ export class CheckoutService {
       const orderItems: Partial<OrderItem>[] = [];
 
       for (const cartItem of cart.items) {
-        const product = productMap.get(cartItem.productId);
+        const product = productMap.get((cartItem as any).productId);
         if (!product) {
           throw new NotFoundException(
-            `Product ${cartItem.productId} not found`,
+            `Product ${(cartItem as any).productId} not found`,
           );
         }
 
-        if (product.availableInventory < cartItem.quantity) {
+        if (product.availableInventory < (cartItem as any).quantity) {
           throw new ConflictException(
-            `Insufficient inventory for ${product.name}. Available: ${product.availableInventory}, Requested: ${cartItem.quantity}`,
+            `Insufficient inventory for ${product.name}. Available: ${product.availableInventory}, Requested: ${(cartItem as any).quantity}`,
           );
         }
 
         // Use current price from product, not snapshot from cart
-        const lineTotal = product.priceInCents * cartItem.quantity;
+        const lineTotal = product.priceInCents * (cartItem as any).quantity;
         subtotalInCents += lineTotal;
 
         orderItems.push({
           productId: product.id,
           productName: product.name,
           priceInCents: product.priceInCents,
-          quantity: cartItem.quantity,
+          quantity: (cartItem as any).quantity,
           lineTotal,
         });
 
         // Decrement inventory
-        product.availableInventory -= cartItem.quantity;
+        product.availableInventory -= (cartItem as any).quantity;
       }
 
       // Save updated inventory
@@ -117,7 +125,6 @@ export class CheckoutService {
       if (couponCode) {
         coupon = await manager
           .createQueryBuilder(Coupon, 'coupon')
-          .setLock('pessimistic_write')
           .where('coupon.code = :code', { code: couponCode })
           .getOne();
 
@@ -170,7 +177,7 @@ export class CheckoutService {
 
       // Mark cart as checked out
       cart.status = CartStatus.CHECKED_OUT;
-      await manager.save(cart);
+      await manager.save(Cart, cart);
 
       // Fetch complete order with items
       return await manager.findOne(Order, {

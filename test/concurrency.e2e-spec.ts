@@ -26,11 +26,13 @@ describe('Concurrency and Idempotency Tests (e2e)', () => {
 
     dataSource = moduleFixture.get<DataSource>(DataSource);
 
-    // Seed test data
-    await dataSource.query('DELETE FROM products');
-    await dataSource.query('DELETE FROM carts');
+    // Seed test data - delete in correct order due to foreign keys
+    await dataSource.query('DELETE FROM order_items');
     await dataSource.query('DELETE FROM orders');
+    await dataSource.query('DELETE FROM cart_items');
+    await dataSource.query('DELETE FROM carts');
     await dataSource.query('DELETE FROM coupons');
+    await dataSource.query('DELETE FROM products');
     await dataSource.query('DELETE FROM config');
 
     // Use UUID v4 format for product IDs
